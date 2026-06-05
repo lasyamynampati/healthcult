@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ page_title }}</title>
+    /static/css/dashboard.css" />
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">HC</div>
+            <div>
+                <h1>HealthCult</h1>
+                <p>Prediction, OCR, and Safe Chat Assistant</p>
+            </div>
+        </div>
+        <div class="topbar-note">Risk Prediction, Report Upload, Explainability, and Guardrailed Chat</div>
+    </header>
+
+    <main class="layout">
+        <section class="panel form-panel">
+            <div class="panel-header">
+                <h2>Run Prediction</h2>
+                <p>Select a model, enter patient ID, and submit clinical values.</p>
+            </div>
+
+            <form id="prediction-form" class="form-grid">
+                <div class="field full">
+                    abel for="model-type">Prediction Type</label>
+                    <select id="model-type" name="model_type" required>
+                        <option value="diabetes">Diabetes</option>
+                        <option value="heart">Heart</option>
+                    </select>
+                </div>
+
+                <div class="field full">
+                    abel for="patient-id">Patient ID</label>
+                    <input id="patient-id" name="patient_id" type="text" placeholder="Enter patient UUID" required />
+                </div>
+
+                <div id="diabetes-fields" class="dynamic-fields full">
+                    <div class="field">abel>Pregnancies</label><input type="number" id="pregnancies" min="0" max="25" step="1" /></div>
+                    <div class="field">abel>Glucose</label><input type="number" id="glucose" min="0" max="400" step="0.1" /></div>
+                    <div class="field">abel>Blood Pressure</label><input type="number" id="blood_pressure" min="0" max="250" step="0.1" /></div>
+                    <div class="field">abel>Skin Thickness</label><input type="number" id="skin_thickness" min="0" max="120" step="0.1" /></div>
+                    <div class="field">abel>Insulin</label><input type="number" id="insulin" min="0" max="1200" step="0.1" /></div>
+                    <div class="field">abel>BMI</label><input type="number" id="bmi" min="0" max="100" step="0.1" /></div>
+                    <div class="field">abel>Diabetes Pedigree Function</label><input type="number" id="diabetes_pedigree_function" min="0" max="10" step="0.001" /></div>
+                    <div class="field">abel>Age</label><input type="number" id="diabetes_age" min="1" max="120" step="1" /></div>
+                </div>
+
+                <div id="heart-fields" class="dynamic-fields full hidden">
+                    <div class="field">abel>Age</label><input type="number" id="heart_age" min="1" max="120" step="1" /></div>
+                    <div class="field">abel>Sex</label><input type="number" id="sex" min="0" max="1" step="1" /></div>
+                    <div class="field">abel>Chest Pain Type</label><input type="number" id="cp" min="0" max="3" step="1" /></div>
+                    <div class="field">abel>Resting BP</label><input type="number" id="trestbps" min="0" max="300" step="0.1" /></div>
+                    <div class="field">abel>Cholesterol</label><input type="number" id="chol" min="0" max="700" step="0.1" /></div>
+                    <div class="field">abel>Fasting Blood Sugar</label><input type="number" id="fbs" min="0" max="1" step="1" /></div>
+                    <div class="field">abel>Rest ECG</label><input type="number" id="restecg" min="0" max="2" step="1" /></div>
+                    <div class="field">abel>Max Heart Rate</label><input type="number" id="thalach" min="0" max="300" step="0.1" /></div>
+                    <div class="field">abel>Exercise Angina</label><input type="number" id="exang" min="0" max="1" step="1" /></div>
+                    <div class="field">abel>Oldpeak</label><input type="number" id="oldpeak" min="0" max="15" step="0.1" /></div>
+                    <div class="field">abel>Slope</label><input type="number" id="slope" min="0" max="2" step="1" /></div>
+                    <div class="field">abel>CA</label><input type="number" id="ca" min="0" max="4" step="1" /></div>
+                    <div class="field">abel>Thal</label><input type="number" id="thal" min="0" max="3" step="1" /></div>
+                </div>
+
+                <div class="actions full">
+                    <button type="submit" class="btn btn-primary">Run Prediction</button>
+                    <button type="button" id="load-history-btn" class="btn btn-secondary">Load History</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="panel result-panel">
+            <div class="panel-header">
+                <h2>Latest Result</h2>
+                <p>The newest prediction appears here with follow-up actions.</p>
+            </div>
+
+            <div id="result-card" class="result-card empty-state">
+                <p>No prediction yet.</p>
+            </div>
+
+            <div class="actions stacked">
+                <button id="explanation-btn" class="btn btn-secondary" disabled>Get Explanation</button>
+                <button id="counterfactual-btn" class="btn btn-secondary" disabled>Generate Counterfactuals</button>
+            </div>
+        </section>
+
+        <section class="panel upload-panel">
+            <div class="panel-header">
+                <h2>Upload Medical Report</h2>
+                <p>Upload a patient report and trigger OCR extraction.</p>
+            </div>
+
+            <form id="document-upload-form" class="form-grid">
+                <div class="field full">
+                    abel for="upload-patient-id">Patient ID</label>
+                    <input id="upload-patient-id" type="text" placeholder="Enter patient UUID" required />
+                </div>
+
+                <div class="field">
+                    abel for="doc-type">Document Type</label>
+                    <input id="doc-type" type="text" placeholder="lab_report / prescription / discharge_summary" />
+                </div>
+
+                <div class="field">
+                    abel for="report-file">Choose File</label>
+                    <input id="report-file" type="file" required />
+                </div>
+
+                <div class="actions full">
+                    <button type="submit" class="btn btn-primary">Upload & Process</button>
+                </div>
+            </form>
+
+            <div id="upload-status" class="output-box">No document uploaded.</div>
+        </section>
+
+        <section class="panel explanation-panel">
+            <div class="panel-header">
+                <h2>Explanation</h2>
+                <p>Model interpretation will appear here.</p>
+            </div>
+            <pre id="explanation-output" class="output-box">No explanation loaded.</pre>
+        </section>
+
+        <section class="panel counterfactual-panel">
+            <div class="panel-header">
+                <h2>Counterfactuals</h2>
+                <p>Actionable feature changes to reduce risk.</p>
+            </div>
+            <pre id="counterfactual-output" class="output-box">No counterfactuals loaded.</pre>
+        </section>
+
+        <section class="panel ocr-panel">
+            <div class="panel-header">
+                <h2>OCR Result</h2>
+                <p>Extracted text, parsed values, and confidence are shown here.</p>
+            </div>
+            <pre id="ocr-output" class="output-box">No OCR result loaded.</pre>
+        </section>
+
+        <section class="panel chat-panel">
+            <div class="panel-header">
+                <h2>HealthCult Assistant</h2>
+                <p>Ask about predictions, OCR summaries, or general health-education topics. Emergency or diagnosis requests are escalated.</p>
+            </div>
+
+            <div id="chat-output" class="chat-output">
+                <div class="chat-message assistant">
+                    <strong>Assistant:</strong>
+                    <span>Hello. I can explain prediction results, OCR outputs, and basic health information, but I cannot diagnose or manage emergencies.</span>
+                </div>
+            </div>
+
+            <form id="chat-form" class="chat-form">
+                <div class="field full">
+                    abel for="chat-context">Context</label>
+                    <select id="chat-context">
+                        <option value="general">General</option>
+                        <option value="prediction">Prediction</option>
+                        <option value="ocr">OCR</option>
+                    </select>
+                </div>
+
+                <div class="field full">
+                    abel for="chat-message">Your message</label>
+                    <textarea id="chat-message" rows="4" placeholder="Ask something about your prediction or uploaded report..." required></textarea>
+                </div>
+
+                <div class="actions full">
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="panel history-panel">
+            <div class="panel-header">
+                <h2>Prediction History</h2>
+                <p>Recent saved assessments for the selected patient.</p>
+            </div>
+            <div id="history-output" class="history-list empty-state">
+                <p>No history loaded.</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
